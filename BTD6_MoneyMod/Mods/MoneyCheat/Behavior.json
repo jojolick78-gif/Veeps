@@ -1,0 +1,97 @@
+{
+  "$schema": "https://raw.githubusercontent.com/sb-zg/Nozomi/refs/heads/master/behavior.schema.json",
+  "name": "Money Cheat",
+  "descRaws": [
+    "Hotkey F8 — add 10000 cash to your team.",
+    "N-Mod menu: Money Cheat -> Add Cash / Set Cash."
+  ],
+  "actions": {
+    "Game.OnUpdate": {
+      "do": [
+        {
+          "if": {
+            "input.isKeyJustPressed": ["key:F8"]
+          },
+          "then": [
+            {
+              "natives.AddCash": {
+                "amount": 10000,
+                "allowNegative": false
+              }
+            },
+            {
+              "notification.showInfo": {
+                "message": "+$10,000 (Money Cheat)"
+              }
+            }
+          ]
+        },
+        {
+          "if": {
+            "and": [
+              { "getToggleValue": "autoInterest" },
+              { "greaterOrEqual": [{ "getVariable": "autoCashTimer" }, 1.0] }
+            ]
+          },
+          "then": [
+            { "setVariable": ["autoCashTimer", 0] },
+            {
+              "natives.AddCash": {
+                "amount": { "getInputValue": "cashAmount" },
+                "allowNegative": false
+              }
+            }
+          ],
+          "else": [
+            {
+              "addToVariable": ["autoCashTimer", { "game.deltaTime": {} }]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "variables": {
+    "autoCashTimer": 0
+  },
+  "toggles": [
+    {
+      "id": "autoInterest",
+      "displayName": "Auto Cash per Second",
+      "descRaws": ["Adds cash every second while enabled (off by default)."],
+      "defaultValue": false,
+      "onChange": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "cashAmount",
+      "displayName": "Add Cash Amount",
+      "type": "double",
+      "defaultValue": 10000,
+      "min": 1,
+      "max": 100000000
+    }
+  ],
+  "buttons": [
+    {
+      "displayName": "Add Cash",
+      "descRaws": ["Adds the configured amount of cash."],
+      "onClick": [
+        {
+          "natives.AddCash": {
+            "amount": {
+              "getInputValue": "cashAmount"
+            },
+            "allowNegative": false
+          }
+        },
+        {
+          "notification.showInfo": {
+            "message": "Added cash!"
+          }
+        }
+      ]
+    }
+  ]
+}
